@@ -2,13 +2,18 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffb3cf">
 <title>Feliz cumpleaños mi niña hermosa 💖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #ffb3cf; }
   body {
     min-height: 100vh;
+    min-height: 100dvh;
     font-family: 'Quicksand', sans-serif;
     color: #7a1f3d;
     background: radial-gradient(circle at 30% 20%, #ffd6e7 0%, #ffb3cf 45%, #ff8fb8 100%);
@@ -17,6 +22,9 @@
     padding: 40px 20px;
     text-align: center;
   }
+  body.locked { overflow: hidden; }
+
+  /* Corazones de fondo de la primera pantalla */
   .heart-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
   .falling {
     position: absolute; top: -10%;
@@ -26,9 +34,12 @@
   @keyframes fall {
     to { transform: translateY(120vh) rotate(360deg); }
   }
+
+  /* Tarjeta (la usan las dos pantallas, así quedan del mismo estilo) */
   .card {
     position: relative; z-index: 1;
     background: rgba(255, 255, 255, 0.35);
+    -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
     border: 2px solid rgba(255, 255, 255, 0.7);
     border-radius: 28px;
@@ -83,8 +94,10 @@
     cursor: pointer;
     box-shadow: 0 10px 24px rgba(233, 30, 99, 0.35);
     transition: transform 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   .btn:hover { transform: translateY(-3px) scale(1.04); }
+  .btn:active { transform: scale(0.96); }
   .pop {
     position: fixed; pointer-events: none; z-index: 6;
     font-size: 28px;
@@ -94,48 +107,92 @@
     to { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
   }
 
-  /* Full-screen surprise */
+  /* Pantalla completa de la sorpresa (tapa TODO lo de atrás) */
   .surprise {
     position: fixed; inset: 0; z-index: 10;
     background: linear-gradient(160deg, #ffe0ec 0%, #ffb3cf 50%, #ff8fb8 100%);
     display: none;
-    overflow: hidden;
-    align-items: center; justify-content: center;
-    flex-direction: column;
-    padding: 28px 16px 40px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 24px 20px;
   }
   .surprise.show { display: flex; }
-  .rain {
-    position: absolute; top: -10vh;
-    animation: fall linear forwards;
-    pointer-events: none;
+
+  /* Lienzo donde se dibujan los corazones */
+  #fx {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+    transition: opacity 0.9s ease;
   }
-  .gallery {
+  #fx.hide { opacity: 0; }
+
+  /* Segunda tarjeta: el mismo tamaño que la primera (el JS copia las medidas) */
+  .photo-card {
     display: none;
-    width: 100%; max-width: 560px;
-    animation: rise 1s ease-out both;
+    flex-direction: column;
+    margin: auto;
+    max-width: 100%;
   }
-  .gallery.show { display: block; }
-  .panel {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(6px);
-    border: 2px solid rgba(255, 255, 255, 0.75);
-    border-radius: 28px;
-    padding: 40px 28px;
-    box-shadow: 0 20px 60px rgba(160, 20, 70, 0.25);
-  }
-  .gallery h2 {
+  .photo-card.show { display: flex; }
+  .photo-card h2 {
     font-family: 'Dancing Script', cursive;
     font-size: clamp(36px, 8vw, 56px);
     color: #c2185b;
     line-height: 1.15;
+    margin-bottom: 18px;
   }
+
+  /* Marco de fotos */
+  .frame {
+    position: relative;
+    flex: 1;
+    min-height: 160px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+  }
+  .slide {
+    position: absolute; inset: 0; margin: 0;
+    opacity: 0;
+    transition: opacity 0.9s ease;
+  }
+  .slide.active { opacity: 1; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .slide figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 34px 16px 14px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 28px;
+    color: #fff;
+    background: linear-gradient(transparent, rgba(122, 31, 61, 0.55));
+  }
+  .empty {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px;
+    font-size: 18px;
+    color: #c2185b;
+  }
+  .empty span { font-size: 56px; }
+  .dots {
+    display: flex; justify-content: center; gap: 8px;
+    margin-top: 16px; min-height: 10px;
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(194, 24, 91, 0.3);
+    transition: transform 0.3s ease, background 0.3s ease;
+  }
+  .dot.on { background: #c2185b; transform: scale(1.3); }
 </style>
 </head>
 <body>
 <div class="heart-bg" id="bg"></div>
 
-<main class="card">
+<main class="card" id="mainCard">
   <span class="big-heart" id="heart">💖</span>
   <h1>Feliz cumpleaños, mi niña hermosa</h1>
   <p class="msg">
@@ -148,18 +205,32 @@
 </main>
 
 <div class="surprise" id="overlay">
-  <div class="gallery" id="gallery">
-    <div class="panel">
-      <h2>ira somos nosotros amorcito uwu</h2>
-    </div>
-  </div>
+  <canvas id="fx"></canvas>
+
+  <section class="card photo-card" id="photoCard">
+    <h2>ira somos nosotros amorcito uwu</h2>
+    <div class="frame" id="frame"></div>
+    <div class="dots" id="dots"></div>
+  </section>
 </div>
 
 <script>
-  // Falling hearts background
+  /* =========================================================
+     ✏️  AQUÍ PONES TUS FOTOS
+     1) Sube las fotos a tu repositorio de GitHub (por ejemplo en una carpeta "fotos")
+     2) Quita las // de las líneas de abajo y cambia los nombres
+     ========================================================= */
+  const FOTOS = [
+    // { src: 'fotos/1.jpg', texto: 'Nuestro primer día 💖' },
+    // { src: 'fotos/2.jpg', texto: 'Mi lugar favorito eres tú' },
+    // { src: 'fotos/3.jpg', texto: '' },
+  ];
+
+  /* ---------- Corazones cayendo en la primera pantalla ---------- */
   const bg = document.getElementById('bg');
   const symbols = ['💖', '💗', '💕', '🌸', '💘'];
   function spawnFalling() {
+    if (document.hidden || showRunning) return;
     const el = document.createElement('span');
     el.className = 'falling';
     el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
@@ -172,7 +243,7 @@
   }
   setInterval(spawnFalling, 400);
 
-  // Burst of hearts from a point
+  /* ---------- Explosión de corazones al tocar el corazón grande ---------- */
   function burst(x, y, count = 18) {
     for (let i = 0; i < count; i++) {
       const p = document.createElement('span');
@@ -190,45 +261,240 @@
   }
   document.getElementById('heart').addEventListener('click', e => burst(e.clientX, e.clientY, 12));
 
-  // Button: full-screen rain of hearts, then the text box
+  /* ---------- Galería de fotos ---------- */
+  const frame = document.getElementById('frame');
+  const dotsBox = document.getElementById('dots');
+  let slides = [], dots = [], slideIdx = 0, slideTimer = null;
+
+  FOTOS.forEach(f => { const im = new Image(); im.src = f.src; }); // precarga
+
+  function buildGallery() {
+    frame.innerHTML = '';
+    dotsBox.innerHTML = '';
+    slides = []; dots = [];
+    if (!FOTOS.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.innerHTML = '<span>📸</span><div>aquí van nuestras fotos</div>';
+      frame.appendChild(empty);
+      return;
+    }
+    FOTOS.forEach((f, i) => {
+      const fig = document.createElement('figure');
+      fig.className = 'slide' + (i === 0 ? ' active' : '');
+      const img = document.createElement('img');
+      img.src = f.src;
+      img.alt = f.texto || 'Nosotros';
+      fig.appendChild(img);
+      if (f.texto) {
+        const cap = document.createElement('figcaption');
+        cap.textContent = f.texto;
+        fig.appendChild(cap);
+      }
+      frame.appendChild(fig);
+      slides.push(fig);
+      if (FOTOS.length > 1) {
+        const d = document.createElement('span');
+        d.className = 'dot' + (i === 0 ? ' on' : '');
+        dotsBox.appendChild(d);
+        dots.push(d);
+      }
+    });
+    slideIdx = 0;
+    startSlideTimer();
+  }
+  function goTo(i) {
+    if (!slides.length) return;
+    slides[slideIdx].classList.remove('active');
+    if (dots[slideIdx]) dots[slideIdx].classList.remove('on');
+    slideIdx = (i + slides.length) % slides.length;
+    slides[slideIdx].classList.add('active');
+    if (dots[slideIdx]) dots[slideIdx].classList.add('on');
+  }
+  function startSlideTimer() {
+    clearInterval(slideTimer);
+    if (slides.length > 1) slideTimer = setInterval(() => goTo(slideIdx + 1), 3800);
+  }
+  frame.addEventListener('click', () => { goTo(slideIdx + 1); startSlideTimer(); });
+
+  /* ---------- Sorpresa: corazones a pantalla completa ---------- */
   const btn = document.getElementById('surprise');
   const overlay = document.getElementById('overlay');
-  const gallery = document.getElementById('gallery');
-  const rainPieces = ['💖', '💞', '💕', '💗'];
-  let started = false;
+  const mainCard = document.getElementById('mainCard');
+  const photoCard = document.getElementById('photoCard');
+  const fx = document.getElementById('fx');
+  const ctx = fx.getContext('2d');
 
-  function dropPiece(delay) {
-    const piece = document.createElement('span');
-    piece.className = 'rain';
-    piece.textContent = rainPieces[Math.floor(Math.random() * rainPieces.length)];
-    piece.style.left = Math.random() * 100 + 'vw';
-    piece.style.fontSize = (22 + Math.random() * 26) + 'px';
-    const dur = 3 + Math.random() * 2.5;
-    piece.style.animationDuration = dur + 's';
-    piece.style.animationDelay = delay + 's';
-    overlay.insertBefore(piece, gallery);
-    setTimeout(() => piece.remove(), (dur + delay) * 1000);
+  // Tiempos (milisegundos)
+  const FILL_START = 1000;   // empieza a llenarse la pantalla
+  const FILL_DUR   = 2800;   // cuánto tarda en llenarse
+  const RAIN_END   = 3800;   // deja de caer lluvia nueva
+  const REVEAL     = 4600;   // aparece la tarjeta
+
+  const EMOJIS = ['💖', '💖', '💗', '💞', '💕'];
+  let sprites = [], rain = [], wall = [];
+  let W = 0, H = 0, dpr = 1;
+  let mode = 'show', showRunning = false, revealed = false;
+  let t0 = 0, last = 0, acc = 0;
+
+  function makeSprites() {
+    const S = 96;
+    sprites = EMOJIS.map(e => {
+      const c = document.createElement('canvas');
+      c.width = c.height = S;
+      const g = c.getContext('2d');
+      g.font = (S * 0.78) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(e, S / 2, S / 2);
+      return c;
+    });
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    fx.width = Math.round(W * dpr);
+    fx.height = Math.round(H * dpr);
+  }
+
+  // La segunda tarjeta copia exactamente el tamaño de la primera
+  function matchCardSize() {
+    const r = mainCard.getBoundingClientRect();
+    photoCard.style.width = r.width + 'px';
+    photoCard.style.height = r.height + 'px';
+  }
+  window.addEventListener('resize', () => {
+    if (!showRunning) return;
+    resize();
+    matchCardSize();
+  });
+
+  function spawnRain(y) {
+    const ambient = mode === 'ambient';
+    const size = ambient ? 18 + Math.random() * 20 : 30 + Math.random() * 40;
+    rain.push({
+      x: Math.random() * W,
+      y: y === undefined ? -size : y,
+      vy: ambient ? 50 + Math.random() * 70 : 220 + Math.random() * 380,
+      size,
+      rot: Math.random() * 6.28,
+      vr: (Math.random() - 0.5) * 2,
+      sw: 10 + Math.random() * 25,
+      ph: Math.random() * 6.28,
+      spr: Math.floor(Math.random() * sprites.length)
+    });
+  }
+
+  // Muro de corazones que se va llenando de abajo hacia arriba hasta tapar todo
+  function buildWall() {
+    const cell = Math.max(38, Math.min(W, H) / 9);
+    const cols = Math.ceil(W / cell) + 2;
+    const rows = Math.ceil(H / cell) + 2;
+    const items = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = (c - 0.5 + (r % 2 ? 0.5 : 0)) * cell + (Math.random() - 0.5) * cell * 0.3;
+        const y = (r - 0.5) * cell + (Math.random() - 0.5) * cell * 0.3;
+        items.push({
+          x, y,
+          size: cell * 1.55 * (0.9 + Math.random() * 0.3),
+          rot: (Math.random() - 0.5) * 0.9,
+          spr: Math.floor(Math.random() * sprites.length),
+          key: (H - y) / H + Math.random() * 0.18,
+          t: 0
+        });
+      }
+    }
+    items.sort((a, b) => a.key - b.key);
+    items.forEach((it, i) => { it.t = FILL_START + (i / items.length) * FILL_DUR; });
+    wall = items;
+  }
+
+  function drawHeart(spr, x, y, size, rot) {
+    const cos = Math.cos(rot) * dpr, sin = Math.sin(rot) * dpr;
+    ctx.setTransform(cos, sin, -sin, cos, x * dpr, y * dpr);
+    ctx.drawImage(sprites[spr], -size / 2, -size / 2, size, size);
+  }
+  function easeOutBack(k) {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2);
+  }
+
+  function loop(now) {
+    if (!showRunning) return;
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
+    last = now;
+    const t = now - t0;
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = mode === 'ambient' ? 0.6 : 1;
+
+    if (mode === 'show') {
+      // lluvia cada vez más fuerte
+      if (t < RAIN_END) {
+        acc += (40 + 220 * Math.min(1, t / 2500)) * dt;
+        while (acc >= 1) { spawnRain(); acc -= 1; }
+      }
+      // muro que llena la pantalla
+      for (let i = 0; i < wall.length; i++) {
+        const h = wall[i];
+        const a = t - h.t;
+        if (a < 0) continue;
+        const k = Math.min(1, a / 280);
+        drawHeart(h.spr, h.x, h.y, h.size * (k < 1 ? easeOutBack(k) : 1), h.rot);
+      }
+      if (!revealed && t >= REVEAL) { revealed = true; reveal(); }
+    } else {
+      // corazoncitos suaves detrás de la tarjeta
+      acc += 4 * dt;
+      while (acc >= 1) { spawnRain(); acc -= 1; }
+    }
+
+    // lluvia (por encima del muro)
+    for (let i = rain.length - 1; i >= 0; i--) {
+      const p = rain[i];
+      p.y += p.vy * dt;
+      p.rot += p.vr * dt;
+      p.ph += dt * 2;
+      if (p.y > H + p.size) { rain.splice(i, 1); continue; }
+      drawHeart(p.spr, p.x + Math.sin(p.ph) * p.sw, p.y, p.size, p.rot);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function reveal() {
+    photoCard.classList.add('show');
+    fx.classList.add('hide');
+    setTimeout(() => {
+      wall = []; rain = []; acc = 0;
+      mode = 'ambient';
+      fx.classList.remove('hide');
+    }, 1000);
   }
 
   btn.addEventListener('click', () => {
-    if (started) return;
-    started = true;
-    btn.style.display = 'none';
+    if (showRunning) return;
+    showRunning = true;
+    btn.disabled = true;
+
+    makeSprites();
+    resize();
+    matchCardSize();
+    buildGallery();
+
+    document.body.classList.add('locked');
     overlay.classList.add('show');
 
-    // Prefill with pieces already mid-fall so the screen is full from the first frame
-    for (let i = 0; i < 260; i++) {
-      dropPiece(-Math.random() * 5);
-    }
-    // Keep it raining for 4 seconds so there are no gaps
-    const spawner = setInterval(() => dropPiece(0), 40);
-    setTimeout(() => clearInterval(spawner), 4000);
+    mode = 'show'; revealed = false; rain = []; acc = 0;
+    // pantalla ya con corazones desde el primer instante
+    for (let i = 0; i < 140; i++) spawnRain(Math.random() * H);
+    buildWall();
 
-    // Clear the rest and reveal the text box
-    setTimeout(() => {
-      overlay.querySelectorAll('.rain').forEach(p => p.remove());
-      gallery.classList.add('show');
-    }, 5500);
+    t0 = last = performance.now();
+    requestAnimationFrame(loop);
   });
 </script>
 </body>
