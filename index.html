@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feliz cumpleaños mi niña hermosa 💖</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    font-family: 'Quicksand', sans-serif;
+    color: #7a1f3d;
+    background: radial-gradient(circle at 30% 20%, #ffd6e7 0%, #ffb3cf 45%, #ff8fb8 100%);
+    overflow-x: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .heart-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .falling {
+    position: absolute; top: -10%;
+    color: rgba(255, 255, 255, 0.8);
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(120vh) rotate(360deg); }
+  }
+  .card {
+    position: relative; z-index: 1;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(6px);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 28px;
+    padding: 40px 28px;
+    max-width: 620px;
+    box-shadow: 0 20px 60px rgba(160, 20, 70, 0.25);
+    animation: rise 1.2s ease-out both;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  .big-heart {
+    font-size: 72px;
+    display: inline-block;
+    animation: pulse 1.4s ease-in-out infinite;
+    cursor: pointer;
+    user-select: none;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+  }
+  h1 {
+    font-family: 'Dancing Script', cursive;
+    font-size: clamp(42px, 8vw, 64px);
+    color: #c2185b;
+    margin: 10px 0 18px;
+    line-height: 1.1;
+  }
+  .msg {
+    font-size: 18px;
+    line-height: 1.75;
+    color: #7a1f3d;
+    margin-bottom: 24px;
+  }
+  .sign {
+    font-family: 'Dancing Script', cursive;
+    font-size: 32px;
+    color: #c2185b;
+  }
+  .btn {
+    margin-top: 26px;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff4f8b, #e91e63);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(233, 30, 99, 0.35);
+    transition: transform 0.2s ease;
+  }
+  .btn:hover { transform: translateY(-3px) scale(1.04); }
+  .pop {
+    position: fixed; pointer-events: none; z-index: 2;
+    font-size: 28px;
+    animation: burst 1.2s ease-out forwards;
+  }
+  @keyframes burst {
+    to { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="heart-bg" id="bg"></div>
+
+<main class="card">
+  <span class="big-heart" id="heart">💖</span>
+  <h1>Feliz cumpleaños, mi niña hermosa</h1>
+  <p class="msg">
+    Espero que te sientas muy bien en este día tan importante para mí, ya que fue el día en el que tú naciste, amor. Y ya cada vez falta menos para que estemos juntos, amorcito. Ya quiero que pase rápido y poder tenerte siempre a mi lado.
+    <br><br>
+    Te amo demasiado, mi princesita. Eres lo más valioso que hay en todo el mundo. Gracias por siempre dejarme estar a tu lado y verte crecer. Muaaaa 💋
+  </p>
+  <p class="sign">Te amo, tu amor 💕</p>
+  <button class="btn" id="surprise">Toca para una sorpresa 🎉</button>
+</main>
+
+<script>
+  // Falling hearts background
+  const bg = document.getElementById('bg');
+  const symbols = ['💖', '💗', '💕', '🌸', '💘'];
+  function spawnFalling() {
+    const el = document.createElement('span');
+    el.className = 'falling';
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.fontSize = (14 + Math.random() * 26) + 'px';
+    const dur = 6 + Math.random() * 8;
+    el.style.animationDuration = dur + 's';
+    bg.appendChild(el);
+    setTimeout(() => el.remove(), dur * 1000);
+  }
+  setInterval(spawnFalling, 400);
+
+  // Burst of hearts from a point
+  function burst(x, y, count = 18) {
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('span');
+      p.className = 'pop';
+      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 160;
+      p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1200);
+    }
+  }
+
+  const heart = document.getElementById('heart');
+  heart.addEventListener('click', e => burst(e.clientX, e.clientY, 12));
+
+  document.getElementById('surprise').addEventListener('click', e => {
+    const r = e.currentTarget.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, 30);
+  });
+</script>
+</body>
+</html>
