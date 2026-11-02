@@ -24,7 +24,9 @@
     animation: fall linear forwards;
   }
   .confetti {
-    position: absolute; top: -10%;
+    position: fixed; top: -10vh;
+    z-index: 5;
+    pointer-events: none;
     animation: fall linear forwards;
     user-select: none;
   }
@@ -91,7 +93,7 @@
   }
   .btn:hover { transform: translateY(-3px) scale(1.04); }
   .pop {
-    position: fixed; pointer-events: none; z-index: 2;
+    position: fixed; pointer-events: none; z-index: 6;
     font-size: 28px;
     animation: burst 1.2s ease-out forwards;
   }
@@ -151,7 +153,7 @@
 
   document.getElementById('heart').addEventListener('click', e => burst(e.clientX, e.clientY, 12));
 
-  // Button: hides itself and rains hearts and party poppers from the top
+  // Button: hides itself and rains hearts and party poppers from the top, in front of everything
   const btn = document.getElementById('surprise');
   const rainPieces = ['💖', '💞', '🎉'];
   btn.addEventListener('click', () => {
@@ -165,7 +167,7 @@
       const dur = 3 + Math.random() * 3;
       piece.style.animationDuration = dur + 's';
       piece.style.animationDelay = (Math.random() * 1.5) + 's';
-      bg.appendChild(piece);
+      document.body.appendChild(piece);
       setTimeout(() => piece.remove(), (dur + 1.5) * 1000);
     }
   });
