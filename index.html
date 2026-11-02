@@ -100,10 +100,9 @@
     background: linear-gradient(160deg, #ffe0ec 0%, #ffb3cf 50%, #ff8fb8 100%);
     display: none;
     overflow: hidden;
-    align-items: center; justify-content: flex-start;
+    align-items: center; justify-content: center;
     flex-direction: column;
     padding: 28px 16px 40px;
-    overflow-y: auto;
   }
   .surprise.show { display: flex; }
   .rain {
@@ -117,27 +116,20 @@
     animation: rise 1s ease-out both;
   }
   .gallery.show { display: block; }
+  .panel {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(6px);
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    border-radius: 28px;
+    padding: 40px 28px;
+    box-shadow: 0 20px 60px rgba(160, 20, 70, 0.25);
+  }
   .gallery h2 {
     font-family: 'Dancing Script', cursive;
     font-size: clamp(36px, 8vw, 56px);
     color: #c2185b;
-    margin-bottom: 20px;
     line-height: 1.15;
   }
-  .photos {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .photos img {
-    width: 100%; aspect-ratio: 3 / 4;
-    object-fit: cover;
-    border-radius: 18px;
-    border: 4px solid #fff;
-    box-shadow: 0 10px 26px rgba(160, 20, 70, 0.3);
-  }
-  .photos img:nth-child(odd) { transform: rotate(-2deg); }
-  .photos img:nth-child(even) { transform: rotate(2deg); }
 </style>
 </head>
 <body>
@@ -157,12 +149,8 @@
 
 <div class="surprise" id="overlay">
   <div class="gallery" id="gallery">
-    <h2>ira somos nosotros amorcito uwu</h2>
-    <div class="photos">
-      [foto1.jpg](foto1.jpg)
-      [foto2.jpg](foto2.jpg)
-      [foto3.jpg](foto3.jpg)
-      [foto4.jpg](foto4.jpg)
+    <div class="panel">
+      <h2>ira somos nosotros amorcito uwu</h2>
     </div>
   </div>
 </div>
@@ -202,12 +190,25 @@
   }
   document.getElementById('heart').addEventListener('click', e => burst(e.clientX, e.clientY, 12));
 
-  // Button: full-screen rain of hearts, then the photo gallery
+  // Button: full-screen rain of hearts, then the text box
   const btn = document.getElementById('surprise');
   const overlay = document.getElementById('overlay');
   const gallery = document.getElementById('gallery');
   const rainPieces = ['💖', '💞', '💕', '💗'];
   let started = false;
+
+  function dropPiece(delay) {
+    const piece = document.createElement('span');
+    piece.className = 'rain';
+    piece.textContent = rainPieces[Math.floor(Math.random() * rainPieces.length)];
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.fontSize = (22 + Math.random() * 26) + 'px';
+    const dur = 3 + Math.random() * 2.5;
+    piece.style.animationDuration = dur + 's';
+    piece.style.animationDelay = delay + 's';
+    overlay.insertBefore(piece, gallery);
+    setTimeout(() => piece.remove(), (dur + delay) * 1000);
+  }
 
   btn.addEventListener('click', () => {
     if (started) return;
@@ -215,22 +216,19 @@
     btn.style.display = 'none';
     overlay.classList.add('show');
 
-    // Dense rain covering the whole screen
-    for (let i = 0; i < 160; i++) {
-      const piece = document.createElement('span');
-      piece.className = 'rain';
-      piece.textContent = rainPieces[Math.floor(Math.random() * rainPieces.length)];
-      piece.style.left = Math.random() * 100 + 'vw';
-      piece.style.fontSize = (18 + Math.random() * 30) + 'px';
-      const dur = 3 + Math.random() * 3;
-      piece.style.animationDuration = dur + 's';
-      piece.style.animationDelay = (Math.random() * 2.5) + 's';
-      overlay.insertBefore(piece, gallery);
-      setTimeout(() => piece.remove(), (dur + 2.5) * 1000);
+    // Prefill with pieces already mid-fall so the screen is full from the first frame
+    for (let i = 0; i < 260; i++) {
+      dropPiece(-Math.random() * 5);
     }
+    // Keep it raining for 4 seconds so there are no gaps
+    const spawner = setInterval(() => dropPiece(0), 40);
+    setTimeout(() => clearInterval(spawner), 4000);
 
-    // After the rain clears, reveal the photos and text
-    setTimeout(() => gallery.classList.add('show'), 5500);
+    // Clear the rest and reveal the text box
+    setTimeout(() => {
+      overlay.querySelectorAll('.rain').forEach(p => p.remove());
+      gallery.classList.add('show');
+    }, 5500);
   });
 </script>
 </body>
