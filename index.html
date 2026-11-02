@@ -143,31 +143,30 @@
     margin-bottom: 18px;
   }
 
-  /* Marco de fotos */
+  /* Fotos como stickers: se acomodan solas al espacio de la tarjeta */
   .frame {
     position: relative;
-    flex: 1;
-    min-height: 160px;
-    border-radius: 20px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.35);
-    border: 2px solid rgba(255, 255, 255, 0.7);
-    cursor: pointer;
+    flex: 1; min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex; flex-direction: column; justify-content: space-evenly;
+    padding: 8px 10px;
   }
-  .slide {
-    position: absolute; inset: 0; margin: 0;
-    opacity: 0;
-    transition: opacity 0.9s ease;
+  .sticker {
+    flex-shrink: 0;
+    object-fit: cover;
+    border: 3px solid #fff;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 20px rgba(160, 20, 70, 0.28);
+    animation: stickerIn 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+    animation-delay: calc(0.5s + var(--i, 0) * 0.2s);
   }
-  .slide.active { opacity: 1; }
-  .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .slide figcaption {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    padding: 34px 16px 14px;
-    font-family: 'Dancing Script', cursive;
-    font-size: 28px;
-    color: #fff;
-    background: linear-gradient(transparent, rgba(122, 31, 61, 0.55));
+  .sticker:nth-child(odd)  { align-self: flex-start; --rot: -3deg; }
+  .sticker:nth-child(even) { align-self: flex-end;   --rot: 3deg; }
+  @keyframes stickerIn {
+    from { opacity: 0; transform: scale(0.4) rotate(var(--rot, 0deg)); }
+    to   { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
   }
   .empty {
     position: absolute; inset: 0;
@@ -177,16 +176,6 @@
     color: #c2185b;
   }
   .empty span { font-size: 56px; }
-  .dots {
-    display: flex; justify-content: center; gap: 8px;
-    margin-top: 16px; min-height: 10px;
-  }
-  .dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: rgba(194, 24, 91, 0.3);
-    transition: transform 0.3s ease, background 0.3s ease;
-  }
-  .dot.on { background: #c2185b; transform: scale(1.3); }
 </style>
 </head>
 <body>
@@ -210,20 +199,19 @@
   <section class="card photo-card" id="photoCard">
     <h2>ira somos nosotros amorcito uwu</h2>
     <div class="frame" id="frame"></div>
-    <div class="dots" id="dots"></div>
   </section>
 </div>
 
 <script>
   /* =========================================================
-     ✏️  AQUÍ PONES TUS FOTOS
-     1) Sube las fotos a tu repositorio de GitHub (por ejemplo en una carpeta "fotos")
-     2) Quita las // de las líneas de abajo y cambia los nombres
+     ✏️  FOTOS: sube 4 fotos a la carpeta "fotos" de tu GitHub
+     con estos nombres: 1.jpg, 2.jpg, 3.jpg y 4.jpg
      ========================================================= */
   const FOTOS = [
-    // { src: 'fotos/1.jpg', texto: 'Nuestro primer día 💖' },
-    // { src: 'fotos/2.jpg', texto: 'Mi lugar favorito eres tú' },
-    // { src: 'fotos/3.jpg', texto: '' },
+    { src: 'fotos/1.jpg' },
+    { src: 'fotos/2.jpg' },
+    { src: 'fotos/3.jpg' },
+    { src: 'fotos/4.jpg' },
   ];
 
   /* ---------- Corazones cayendo en la primera pantalla ---------- */
@@ -261,61 +249,55 @@
   }
   document.getElementById('heart').addEventListener('click', e => burst(e.clientX, e.clientY, 12));
 
-  /* ---------- Galería de fotos ---------- */
+  /* ---------- Fotos tipo sticker ---------- */
   const frame = document.getElementById('frame');
-  const dotsBox = document.getElementById('dots');
-  let slides = [], dots = [], slideIdx = 0, slideTimer = null;
 
   FOTOS.forEach(f => { const im = new Image(); im.src = f.src; }); // precarga
 
+  function showEmpty() {
+    frame.innerHTML = '';
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = '<span>📸</span><div>aquí van nuestras fotos</div>';
+    frame.appendChild(empty);
+  }
+
   function buildGallery() {
     frame.innerHTML = '';
-    dotsBox.innerHTML = '';
-    slides = []; dots = [];
-    if (!FOTOS.length) {
-      const empty = document.createElement('div');
-      empty.className = 'empty';
-      empty.innerHTML = '<span>📸</span><div>aquí van nuestras fotos</div>';
-      frame.appendChild(empty);
-      return;
-    }
+    if (!FOTOS.length) { showEmpty(); return; }
     FOTOS.forEach((f, i) => {
-      const fig = document.createElement('figure');
-      fig.className = 'slide' + (i === 0 ? ' active' : '');
       const img = document.createElement('img');
+      img.className = 'sticker';
       img.src = f.src;
-      img.alt = f.texto || 'Nosotros';
-      fig.appendChild(img);
-      if (f.texto) {
-        const cap = document.createElement('figcaption');
-        cap.textContent = f.texto;
-        fig.appendChild(cap);
-      }
-      frame.appendChild(fig);
-      slides.push(fig);
-      if (FOTOS.length > 1) {
-        const d = document.createElement('span');
-        d.className = 'dot' + (i === 0 ? ' on' : '');
-        dotsBox.appendChild(d);
-        dots.push(d);
-      }
+      img.alt = 'Nosotros';
+      img.style.setProperty('--i', i);
+      // si una foto no existe, se quita y las demás se reacomodan
+      img.onerror = () => {
+        img.remove();
+        if (!frame.querySelector('.sticker')) showEmpty();
+        else layoutStickers();
+      };
+      frame.appendChild(img);
     });
-    slideIdx = 0;
-    startSlideTimer();
   }
-  function goTo(i) {
-    if (!slides.length) return;
-    slides[slideIdx].classList.remove('active');
-    if (dots[slideIdx]) dots[slideIdx].classList.remove('on');
-    slideIdx = (i + slides.length) % slides.length;
-    slides[slideIdx].classList.add('active');
-    if (dots[slideIdx]) dots[slideIdx].classList.add('on');
+
+  // Ajusta el tamaño de las fotos para que quepan todas en la tarjeta
+  function layoutStickers() {
+    const imgs = frame.querySelectorAll('.sticker');
+    const n = imgs.length;
+    const fh = frame.clientHeight, fw = frame.clientWidth;
+    if (!n || fh <= 0) return;
+    const gap = 12, ratio = 1.35;
+    let h = (fh - 16 - gap * (n - 1)) / n;
+    let w = h * ratio;
+    const maxW = (fw - 20) * 0.78;
+    if (w > maxW) { w = maxW; h = w / ratio; }
+    if (h < 70) { h = 70; w = h * ratio; }
+    imgs.forEach(im => {
+      im.style.width = w + 'px';
+      im.style.height = h + 'px';
+    });
   }
-  function startSlideTimer() {
-    clearInterval(slideTimer);
-    if (slides.length > 1) slideTimer = setInterval(() => goTo(slideIdx + 1), 3800);
-  }
-  frame.addEventListener('click', () => { goTo(slideIdx + 1); startSlideTimer(); });
 
   /* ---------- Sorpresa: corazones a pantalla completa ---------- */
   const btn = document.getElementById('surprise');
@@ -369,6 +351,7 @@
     if (!showRunning) return;
     resize();
     matchCardSize();
+    layoutStickers();
   });
 
   function spawnRain(y) {
@@ -467,6 +450,7 @@
 
   function reveal() {
     photoCard.classList.add('show');
+    layoutStickers();
     fx.classList.add('hide');
     setTimeout(() => {
       wall = []; rain = []; acc = 0;
