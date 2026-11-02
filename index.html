@@ -85,6 +85,14 @@
     transition: transform 0.2s ease;
   }
   .btn:hover { transform: translateY(-3px) scale(1.04); }
+  .thanks {
+    display: none;
+    margin-top: 26px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 40px;
+    color: #c2185b;
+    animation: rise 0.8s ease-out both;
+  }
   .pop {
     position: fixed; pointer-events: none; z-index: 2;
     font-size: 28px;
@@ -92,6 +100,12 @@
   }
   @keyframes burst {
     to { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
+  }
+  .giant-heart {
+    position: fixed; z-index: 10; pointer-events: none;
+    width: 24px; height: 24px;
+    fill: #e91e63;
+    transform-origin: 50% 50%;
   }
 </style>
 </head>
@@ -104,10 +118,11 @@
   <p class="msg">
     Espero que te sientas muy bien en este día tan importante para mí, ya que fue el día en el que tú naciste, amor. Y ya cada vez falta menos para que estemos juntos, amorcito. Ya quiero que pase rápido y poder tenerte siempre a mi lado.
     <br><br>
-    Te amo demasiado, mi princesita. Eres lo más valioso que hay en todo el mundo. Gracias por siempre dejarme estar a tu lado y verte crecer. Muaaaa 💋
+    Te amo demasiado, mi princesita. Eres lo más valioso que hay en todo el mundo. Gracias por siempre dejarme estar a tu lado y verte crecer. Muaaaa
   </p>
-  <p class="sign">Te amo, tu amor 💕</p>
+  <p class="sign">Te amo mi esposita linda 💖</p>
   <button class="btn" id="surprise">Toca para una sorpresa 🎉</button>
+  <p class="thanks" id="thanks">Muchas gracias 💖</p>
 </main>
 
 <script>
@@ -144,12 +159,44 @@
     }
   }
 
-  const heart = document.getElementById('heart');
-  heart.addEventListener('click', e => burst(e.clientX, e.clientY, 12));
+  document.getElementById('heart').addEventListener('click', e => burst(e.clientX, e.clientY, 12));
 
-  document.getElementById('surprise').addEventListener('click', e => {
-    const r = e.currentTarget.getBoundingClientRect();
-    burst(r.left + r.width / 2, r.top + r.height / 2, 30);
+  // Giant heart: expands over the whole screen, shrinks back into the button, vanishes
+  const btn = document.getElementById('surprise');
+  btn.addEventListener('click', () => {
+    const r = btn.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.classList.add('giant-heart');
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', 'M12 21s-7.5-4.6-9.6-9.1C.9 8.4 2.6 4.5 6.3 4.5c2 0 3.3 1 4.2 2.3.9-1.3 2.2-2.3 4.2-2.3 3.7 0 5.4 3.9 3.9 7.4C19.5 16.4 12 21 12 21z');
+    svg.appendChild(path);
+    svg.style.left = (cx - 12) + 'px';
+    svg.style.top = (cy - 12) + 'px';
+    document.body.appendChild(svg);
+
+    // Scale needed so the heart covers the whole viewport
+    const diag = Math.hypot(window.innerWidth, window.innerHeight);
+    const S = (diag / 2) / 12 * 1.2;
+
+    const anim = svg.animate([
+      { transform: 'scale(1)', opacity: 1, offset: 0 },
+      { transform: `scale(${S})`, opacity: 1, offset: 0.45 },
+      { transform: `scale(${S})`, opacity: 1, offset: 0.6 },
+      { transform: 'scale(1)', opacity: 1, offset: 0.9 },
+      { transform: 'scale(0.2)', opacity: 0, offset: 1 }
+    ], { duration: 2200, easing: 'ease-in-out' });
+
+    anim.onfinish = () => {
+      svg.remove();
+      btn.style.display = 'none';
+      const thanks = document.getElementById('thanks');
+      thanks.style.display = 'block';
+    };
   });
 </script>
 </body>
