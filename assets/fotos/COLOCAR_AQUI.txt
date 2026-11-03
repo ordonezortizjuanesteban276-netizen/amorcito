@@ -1,0 +1,2 @@
+Opcional: aquí se pueden guardar copias locales de las cinco fotografías originales.
+Ahora mismo la web las carga desde el repositorio de GitHub (ver README.md, apartado «Fotos»).
