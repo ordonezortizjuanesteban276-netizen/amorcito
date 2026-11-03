@@ -17,7 +17,7 @@
 - Carta: el papel ya no se sale del sobre al abrirse (la altura se mide sin tocar estilos, así Safari anima bien la transición).
 - Fondo tierno: corazones suaves, corazoncitos, destellos, florecitas y burbujitas de luz que flotan/titilan detrás del contenido (solo `transform`/`opacity`). Con movimiento reducido se quedan quietos.
 - Pruebas y ajustes pensados para iPhone 17 (402×874 @3x).
-- Música: empieza siempre desde el principio, se repite al terminar y, si se sale del navegador, se quita y vuelve al inicio.
+- Canción incluida (assets/musica/cancion.mp3, MP3 160 kbps). Música: empieza siempre desde el principio, se repite al terminar y, si se sale del navegador, se quita y vuelve al inicio.
 
 ### Errores corregidos
 - Carta (iPhone/Safari): la solapa se dibujaba encima del texto. Sobre rehecho sin 3D ni cambios de capa; cerrado queda limpio y abierto se lee completo.

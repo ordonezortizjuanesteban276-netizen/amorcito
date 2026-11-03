@@ -1,2 +1,2 @@
-La música es opcional. Guarda tu canción (MP3, que tengas derecho a usar) con el nombre exacto cancion.mp3 en esta carpeta.
+La canción está en cancion.mp3 (la reproduce el botón «música»).
 Suena solo al pulsar el botón «música»; nunca se reproduce sola.
