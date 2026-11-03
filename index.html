@@ -1,485 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#ffb3cf">
-<title>Feliz cumpleaños mi niña hermosa 💖</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { background: #ffb3cf; }
-  body {
-    min-height: 100vh;
-    min-height: 100dvh;
-    font-family: 'Quicksand', sans-serif;
-    color: #7a1f3d;
-    background: radial-gradient(circle at 30% 20%, #ffd6e7 0%, #ffb3cf 45%, #ff8fb8 100%);
-    overflow-x: hidden;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 40px 20px;
-    text-align: center;
-  }
-  body.locked { overflow: hidden; }
-
-  /* Corazones de fondo de la primera pantalla */
-  .heart-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-  .falling {
-    position: absolute; top: -10%;
-    color: rgba(255, 255, 255, 0.8);
-    animation: fall linear forwards;
-  }
-  @keyframes fall {
-    to { transform: translateY(120vh) rotate(360deg); }
-  }
-
-  /* Tarjeta (la usan las dos pantallas, así quedan del mismo estilo) */
-  .card {
-    position: relative; z-index: 1;
-    background: rgba(255, 255, 255, 0.35);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    border: 2px solid rgba(255, 255, 255, 0.7);
-    border-radius: 28px;
-    padding: 40px 28px;
-    max-width: 620px;
-    box-shadow: 0 20px 60px rgba(160, 20, 70, 0.25);
-    animation: rise 1.2s ease-out both;
-  }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(30px) scale(0.97); }
-    to { opacity: 1; transform: none; }
-  }
-  .big-heart {
-    font-size: 72px;
-    display: inline-block;
-    animation: pulse 1.4s ease-in-out infinite;
-    cursor: pointer;
-    user-select: none;
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.18); }
-  }
-  h1 {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(42px, 8vw, 64px);
-    color: #c2185b;
-    margin: 10px 0 18px;
-    line-height: 1.1;
-  }
-  .msg {
-    font-size: 18px;
-    line-height: 1.75;
-    color: #7a1f3d;
-    margin-bottom: 24px;
-  }
-  .sign {
-    font-family: 'Dancing Script', cursive;
-    font-size: 32px;
-    color: #c2185b;
-  }
-  .btn {
-    margin-top: 26px;
-    font-family: 'Quicksand', sans-serif;
-    font-weight: 600;
-    font-size: 16px;
-    padding: 14px 28px;
-    border: none;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #ff4f8b, #e91e63);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 10px 24px rgba(233, 30, 99, 0.35);
-    transition: transform 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn:hover { transform: translateY(-3px) scale(1.04); }
-  .btn:active { transform: scale(0.96); }
-  .pop {
-    position: fixed; pointer-events: none; z-index: 6;
-    font-size: 28px;
-    animation: burst 1.2s ease-out forwards;
-  }
-  @keyframes burst {
-    to { transform: translate(var(--dx), var(--dy)) scale(0.4); opacity: 0; }
-  }
-
-  /* Pantalla completa de la sorpresa (tapa TODO lo de atrás) */
-  .surprise {
-    position: fixed; inset: 0; z-index: 10;
-    background: linear-gradient(160deg, #ffe0ec 0%, #ffb3cf 50%, #ff8fb8 100%);
-    display: none;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 24px 20px;
-  }
-  .surprise.show { display: flex; }
-
-  /* Lienzo donde se dibujan los corazones */
-  #fx {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    z-index: 0; pointer-events: none;
-    transition: opacity 0.9s ease;
-  }
-  #fx.hide { opacity: 0; }
-
-  /* Segunda tarjeta: el mismo tamaño que la primera (el JS copia las medidas) */
-  .photo-card {
-    display: none;
-    flex-direction: column;
-    margin: auto;
-    max-width: 100%;
-  }
-  .photo-card.show { display: flex; }
-  .photo-card h2 {
-    font-family: 'Dancing Script', cursive;
-    font-size: clamp(36px, 8vw, 56px);
-    color: #c2185b;
-    line-height: 1.15;
-    margin-bottom: 18px;
-  }
-
-  /* Fotos como stickers: se acomodan solas al espacio de la tarjeta */
-  .frame {
-    position: relative;
-    flex: 1; min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    display: flex; flex-direction: column; justify-content: space-evenly;
-    padding: 8px 10px;
-  }
-  .sticker {
-    flex-shrink: 0;
-    object-fit: cover;
-    border: 3px solid #fff;
-    border-radius: 26px;
-    background: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 20px rgba(160, 20, 70, 0.28);
-    animation: stickerIn 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both;
-    animation-delay: calc(0.5s + var(--i, 0) * 0.2s);
-  }
-  .sticker:nth-child(odd)  { align-self: flex-start; --rot: -3deg; }
-  .sticker:nth-child(even) { align-self: flex-end;   --rot: 3deg; }
-  @keyframes stickerIn {
-    from { opacity: 0; transform: scale(0.4) rotate(var(--rot, 0deg)); }
-    to   { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); }
-  }
-  .empty {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 10px;
-    font-size: 18px;
-    color: #c2185b;
-  }
-  .empty span { font-size: 56px; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7dce5">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Una pequeña sorpresa hecha con mucho amor.">
+  <title>Para mi niña hermosa ♡</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='48' font-size='48' text-anchor='middle' fill='%23bd7189'%3E%E2%99%A1%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Parisienne&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="heart-bg" id="bg"></div>
+  <div class="ambient" aria-hidden="true"></div>
+  <div class="petals" id="petals" aria-hidden="true"></div>
+  <div class="bg-decor" id="bgDecor" aria-hidden="true"></div>
 
-<main class="card" id="mainCard">
-  <span class="big-heart" id="heart">💖</span>
-  <h1>Feliz cumpleaños, mi niña hermosa</h1>
-  <p class="msg">
-    Espero que te sientas muy bien en este día tan importante para mí, ya que fue el día en el que tú naciste, amor. Y ya cada vez falta menos para que estemos juntos, amorcito. Ya quiero que pase rápido y poder tenerte siempre a mi lado.
-    <br><br>
-    Te amo demasiado, mi princesita. Eres lo más valioso que hay en todo el mundo. Gracias por siempre dejarme estar a tu lado y verte crecer. Muaaaa
-  </p>
-  <p class="sign">Te amo mi esposita linda 💖</p>
-  <button class="btn" id="surprise">Toca aca amorcito</button>
-</main>
+  <header class="topbar">
+    <span class="topbar-mark">♡</span>
+    <span class="topbar-text">hecho con amor, para ti</span>
+    <button class="music-toggle" id="musicToggle" type="button" aria-label="Activar música" aria-pressed="false">
+      <span class="music-icon">♫</span><span class="music-label">música</span>
+    </button>
+  </header>
 
-<div class="surprise" id="overlay">
-  <canvas id="fx"></canvas>
+  <main>
+    <section class="screen active" id="welcome" aria-labelledby="welcomeTitle">
+      <div class="intro-card glass">
+        <p class="eyebrow">un día tan especial</p>
+        <button class="hero-heart" id="heartBurst" type="button" aria-label="Enviar corazones">♡</button>
+        <h1 id="welcomeTitle">Feliz cumpleaños,<br><em>mi niña hermosa</em></h1>
+        <div class="fine-line"><span>✦</span></div>
+        <p class="intro-copy">Amorcito eres la persona mas importante q tengo en toda mi vida mua.</p>
+        <button class="primary-btn" data-go="letter" type="button">Tengo algo para ti <span>→</span></button>
+      </div>
+      <span class="corner-note">con todo mi cariño</span>
+    </section>
 
-  <section class="card photo-card" id="photoCard">
-    <h2>ira somos nosotros amorcito uwu</h2>
-    <div class="frame" id="frame"></div>
-  </section>
-</div>
+    <section class="screen" id="letter" aria-labelledby="letterTitle">
+      <div class="letter-wrap">
+        <p class="eyebrow">unas palabras para ti</p>
+        <div class="envelope" id="envelope">
+          <div class="envelope-back"></div>
+          <div class="envelope-flap-open"></div>
+          <article class="letter-paper" id="letterPaper">
+            <span class="letter-flower" aria-hidden="true">✿</span>
+            <div class="letter-body">
+            <h2 id="letterTitle">Mi amorcito,</h2>
+            <p>Espero que te sientas muy bien en este día tan importante para nosotros, ya que fue el día en el que tú naciste, amor. Y ya cada vez falta menos para que estemos juntos, amorcito. Ya quiero que pase rápido y poder tenerte siempre a mi lado.</p>
+            <p>Te amo demasiado, mi princesita. Eres lo más valioso que hay en todo el mundo. Gracias por siempre dejarme estar a tu lado y verte crecer. Muaaaa</p>
+            <p class="letter-sign">Te amo mi esposita linda <span>💖</span></p>
+            </div>
+          </article>
+          <div class="envelope-front"></div>
+          <div class="envelope-flap"></div>
+          <button class="envelope-open" id="openLetter" type="button" aria-expanded="false" aria-controls="letterPaper">Abrir mi carta ♡</button>
+        </div>
+        <button class="text-btn" data-go="gallery" type="button">Ver nuestros recuerdos <span>→</span></button>
+      </div>
+    </section>
 
-<script>
-  /* =========================================================
-     ✏️  FOTOS: sube 4 fotos a la carpeta "fotos" de tu GitHub
-     con estos nombres: 1.jpg, 2.jpg, 3.jpg y 4.jpg
-     ========================================================= */
-  const FOTOS = [
-    { src: 'IMG_0749_Original.png' },
-    { src: 'IMG_1382_Original.png' },
-    { src: 'C2EC7219-AD3B-48F4-81AC-5A7FB530821A_Original.jpeg' },
-    { src: 'IMG_0794_Original.png' },
-  ];
+    <section class="screen" id="gallery" aria-labelledby="galleryTitle">
+      <div class="gallery-shell glass">
+        <p class="eyebrow">mis recuerdos favoritos</p>
+        <h2 id="galleryTitle">ira, somos nosotros <span>♡</span></h2>
+        <p class="section-copy">Amorcito quiero tener muchas fotos contigos jugando y cuando estemos en persona.</p>
+        <div class="photo-stage">
+          <button class="gallery-arrow prev" id="prevPhoto" type="button" aria-label="Fotografía anterior">‹</button>
+          <figure class="polaroid">
+            <div class="photo-window"><img id="galleryPhoto" alt="Uno de nuestros recuerdos" src="https://raw.githubusercontent.com/ordonezortizjuanesteban276-netizen/amorcito/main/IMG_0749_Original.png" decoding="async" fetchpriority="low"></div>
+          </figure>
+          <button class="gallery-arrow next" id="nextPhoto" type="button" aria-label="Fotografía siguiente">›</button>
+        </div>
+        <div class="photo-dots" id="photoDots" role="group" aria-label="Elegir fotografía"></div>
+        <p class="photo-count" id="photoCount" aria-live="polite">01 / 05</p>
+        <button class="primary-btn" data-go="final" type="button">Una última cosita <span>→</span></button>
+      </div>
+    </section>
 
-  /* ---------- Corazones cayendo en la primera pantalla ---------- */
-  const bg = document.getElementById('bg');
-  const symbols = ['💖', '💗', '💕', '🌸', '💘'];
-  function spawnFalling() {
-    if (document.hidden || showRunning) return;
-    const el = document.createElement('span');
-    el.className = 'falling';
-    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    el.style.left = Math.random() * 100 + 'vw';
-    el.style.fontSize = (14 + Math.random() * 26) + 'px';
-    const dur = 6 + Math.random() * 8;
-    el.style.animationDuration = dur + 's';
-    bg.appendChild(el);
-    setTimeout(() => el.remove(), dur * 1000);
-  }
-  setInterval(spawnFalling, 400);
+    <section class="screen" id="final" aria-labelledby="finalTitle">
+      <div class="final-card glass">
+        <div class="final-halo" aria-hidden="true">♡</div>
+        <p class="eyebrow">y esto es para siempre</p>
+        <h2 id="finalTitle">Si pudiera elegir<br><em>otra vez...</em></h2>
+        <p class="final-message">gracias por ser tu, hacerme tan feliz y por todos los recuerdos que tenemos y q vamos a tener.</p>
+        <p class="final-sign">con amor, siempre ♡</p>
+        <button class="primary-btn" id="replay" type="button">Volver a vivirlo <span>↻</span></button>
+      </div>
+      <div class="heart-rain" id="heartRain" aria-hidden="true"></div>
+    </section>
+  </main>
 
-  /* ---------- Explosión de corazones al tocar el corazón grande ---------- */
-  function burst(x, y, count = 18) {
-    for (let i = 0; i < count; i++) {
-      const p = document.createElement('span');
-      p.className = 'pop';
-      p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      p.style.left = x + 'px';
-      p.style.top = y + 'px';
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 80 + Math.random() * 160;
-      p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
-      p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 1200);
-    }
-  }
-  document.getElementById('heart').addEventListener('click', e => burst(e.clientX, e.clientY, 12));
-
-  /* ---------- Fotos tipo sticker ---------- */
-  const frame = document.getElementById('frame');
-
-  FOTOS.forEach(f => { const im = new Image(); im.src = f.src; }); // precarga
-
-  function showEmpty() {
-    frame.innerHTML = '';
-    const empty = document.createElement('div');
-    empty.className = 'empty';
-    empty.innerHTML = '<span>📸</span><div>aquí van nuestras fotos</div>';
-    frame.appendChild(empty);
-  }
-
-  function buildGallery() {
-    frame.innerHTML = '';
-    if (!FOTOS.length) { showEmpty(); return; }
-    FOTOS.forEach((f, i) => {
-      const img = document.createElement('img');
-      img.className = 'sticker';
-      img.src = f.src;
-      img.alt = 'Nosotros';
-      img.style.setProperty('--i', i);
-      // si una foto no existe, se quita y las demás se reacomodan
-      img.onerror = () => {
-        img.remove();
-        if (!frame.querySelector('.sticker')) showEmpty();
-        else layoutStickers();
-      };
-      frame.appendChild(img);
-    });
-  }
-
-  // Ajusta el tamaño de las fotos para que quepan todas en la tarjeta
-  function layoutStickers() {
-    const imgs = frame.querySelectorAll('.sticker');
-    const n = imgs.length;
-    const fh = frame.clientHeight, fw = frame.clientWidth;
-    if (!n || fh <= 0) return;
-    const gap = 12, ratio = 1.35;
-    let h = (fh - 16 - gap * (n - 1)) / n;
-    let w = h * ratio;
-    const maxW = (fw - 20) * 0.78;
-    if (w > maxW) { w = maxW; h = w / ratio; }
-    if (h < 70) { h = 70; w = h * ratio; }
-    imgs.forEach(im => {
-      im.style.width = w + 'px';
-      im.style.height = h + 'px';
-    });
-  }
-
-  /* ---------- Sorpresa: corazones a pantalla completa ---------- */
-  const btn = document.getElementById('surprise');
-  const overlay = document.getElementById('overlay');
-  const mainCard = document.getElementById('mainCard');
-  const photoCard = document.getElementById('photoCard');
-  const fx = document.getElementById('fx');
-  const ctx = fx.getContext('2d');
-
-  // Tiempos (milisegundos)
-  const FILL_START = 1000;   // empieza a llenarse la pantalla
-  const FILL_DUR   = 2800;   // cuánto tarda en llenarse
-  const RAIN_END   = 3800;   // deja de caer lluvia nueva
-  const REVEAL     = 4600;   // aparece la tarjeta
-
-  const EMOJIS = ['💖', '💖', '💗', '💞', '💕'];
-  let sprites = [], rain = [], wall = [];
-  let W = 0, H = 0, dpr = 1;
-  let mode = 'show', showRunning = false, revealed = false;
-  let t0 = 0, last = 0, acc = 0;
-
-  function makeSprites() {
-    const S = 96;
-    sprites = EMOJIS.map(e => {
-      const c = document.createElement('canvas');
-      c.width = c.height = S;
-      const g = c.getContext('2d');
-      g.font = (S * 0.78) + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
-      g.textAlign = 'center';
-      g.textBaseline = 'middle';
-      g.fillText(e, S / 2, S / 2);
-      return c;
-    });
-  }
-
-  function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth;
-    H = window.innerHeight;
-    fx.width = Math.round(W * dpr);
-    fx.height = Math.round(H * dpr);
-  }
-
-  // La segunda tarjeta copia exactamente el tamaño de la primera
-  function matchCardSize() {
-    const r = mainCard.getBoundingClientRect();
-    photoCard.style.width = r.width + 'px';
-    photoCard.style.height = r.height + 'px';
-  }
-  window.addEventListener('resize', () => {
-    if (!showRunning) return;
-    resize();
-    matchCardSize();
-    layoutStickers();
-  });
-
-  function spawnRain(y) {
-    const ambient = mode === 'ambient';
-    const size = ambient ? 18 + Math.random() * 20 : 30 + Math.random() * 40;
-    rain.push({
-      x: Math.random() * W,
-      y: y === undefined ? -size : y,
-      vy: ambient ? 50 + Math.random() * 70 : 220 + Math.random() * 380,
-      size,
-      rot: Math.random() * 6.28,
-      vr: (Math.random() - 0.5) * 2,
-      sw: 10 + Math.random() * 25,
-      ph: Math.random() * 6.28,
-      spr: Math.floor(Math.random() * sprites.length)
-    });
-  }
-
-  // Muro de corazones que se va llenando de abajo hacia arriba hasta tapar todo
-  function buildWall() {
-    const cell = Math.max(38, Math.min(W, H) / 9);
-    const cols = Math.ceil(W / cell) + 2;
-    const rows = Math.ceil(H / cell) + 2;
-    const items = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const x = (c - 0.5 + (r % 2 ? 0.5 : 0)) * cell + (Math.random() - 0.5) * cell * 0.3;
-        const y = (r - 0.5) * cell + (Math.random() - 0.5) * cell * 0.3;
-        items.push({
-          x, y,
-          size: cell * 1.55 * (0.9 + Math.random() * 0.3),
-          rot: (Math.random() - 0.5) * 0.9,
-          spr: Math.floor(Math.random() * sprites.length),
-          key: (H - y) / H + Math.random() * 0.18,
-          t: 0
-        });
-      }
-    }
-    items.sort((a, b) => a.key - b.key);
-    items.forEach((it, i) => { it.t = FILL_START + (i / items.length) * FILL_DUR; });
-    wall = items;
-  }
-
-  function drawHeart(spr, x, y, size, rot) {
-    const cos = Math.cos(rot) * dpr, sin = Math.sin(rot) * dpr;
-    ctx.setTransform(cos, sin, -sin, cos, x * dpr, y * dpr);
-    ctx.drawImage(sprites[spr], -size / 2, -size / 2, size, size);
-  }
-  function easeOutBack(k) {
-    const c1 = 1.70158, c3 = c1 + 1;
-    return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2);
-  }
-
-  function loop(now) {
-    if (!showRunning) return;
-    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
-    last = now;
-    const t = now - t0;
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, W, H);
-    ctx.globalAlpha = mode === 'ambient' ? 0.6 : 1;
-
-    if (mode === 'show') {
-      // lluvia cada vez más fuerte
-      if (t < RAIN_END) {
-        acc += (40 + 220 * Math.min(1, t / 2500)) * dt;
-        while (acc >= 1) { spawnRain(); acc -= 1; }
-      }
-      // muro que llena la pantalla
-      for (let i = 0; i < wall.length; i++) {
-        const h = wall[i];
-        const a = t - h.t;
-        if (a < 0) continue;
-        const k = Math.min(1, a / 280);
-        drawHeart(h.spr, h.x, h.y, h.size * (k < 1 ? easeOutBack(k) : 1), h.rot);
-      }
-      if (!revealed && t >= REVEAL) { revealed = true; reveal(); }
-    } else {
-      // corazoncitos suaves detrás de la tarjeta
-      acc += 4 * dt;
-      while (acc >= 1) { spawnRain(); acc -= 1; }
-    }
-
-    // lluvia (por encima del muro)
-    for (let i = rain.length - 1; i >= 0; i--) {
-      const p = rain[i];
-      p.y += p.vy * dt;
-      p.rot += p.vr * dt;
-      p.ph += dt * 2;
-      if (p.y > H + p.size) { rain.splice(i, 1); continue; }
-      drawHeart(p.spr, p.x + Math.sin(p.ph) * p.sw, p.y, p.size, p.rot);
-    }
-    requestAnimationFrame(loop);
-  }
-
-  function reveal() {
-    photoCard.classList.add('show');
-    layoutStickers();
-    fx.classList.add('hide');
-    setTimeout(() => {
-      wall = []; rain = []; acc = 0;
-      mode = 'ambient';
-      fx.classList.remove('hide');
-    }, 1000);
-  }
-
-  btn.addEventListener('click', () => {
-    if (showRunning) return;
-    showRunning = true;
-    btn.disabled = true;
-
-    makeSprites();
-    resize();
-    matchCardSize();
-    buildGallery();
-
-    document.body.classList.add('locked');
-    overlay.classList.add('show');
-
-    mode = 'show'; revealed = false; rain = []; acc = 0;
-    // pantalla ya con corazones desde el primer instante
-    for (let i = 0; i < 140; i++) spawnRain(Math.random() * H);
-    buildWall();
-
-    t0 = last = performance.now();
-    requestAnimationFrame(loop);
-  });
-</script>
+  <audio id="backgroundMusic" loop preload="none"></audio>
+  <script src="js/main.js" defer></script>
 </body>
 </html>
