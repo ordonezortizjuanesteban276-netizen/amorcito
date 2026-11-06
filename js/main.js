@@ -9,7 +9,9 @@
     { src: "https://raw.githubusercontent.com/ordonezortizjuanesteban276-netizen/amorcito/main/IMG_1382_Original.png" },
     { src: "https://raw.githubusercontent.com/ordonezortizjuanesteban276-netizen/amorcito/main/C2EC7219-AD3B-48F4-81AC-5A7FB530821A_Original.jpeg" },
     { src: "https://raw.githubusercontent.com/ordonezortizjuanesteban276-netizen/amorcito/main/IMG_0794_Original.png" },
-    { src: "https://raw.githubusercontent.com/ordonezortizjuanesteban276-netizen/amorcito/main/IMG_1366_Original.png" }
+    { src: "https://raw.githubusercontent.com/ordonezortizjuanesteban276-netizen/amorcito/main/IMG_1366_Original.png" },
+    { src: "assets/fotos/foto-6.jpg" },
+    { src: "assets/fotos/foto-7.jpg" }
   ];
 
   const screens = [...document.querySelectorAll(".screen")];
