@@ -153,25 +153,56 @@
     labelTimer = window.setTimeout(() => { musicLabel.textContent = "música"; }, 3000);
   }
 
-  musicButton.addEventListener("click", async () => {
+  async function startMusic() {
     if (!audioReady) {
       audio.src = MUSIC_FILE;
       audioReady = true;
     }
+    setMusicUI(true);
+    try {
+      await audio.play();
+      return true;
+    } catch (error) {
+      // Si se pulsó pausa mientras empezaba a sonar, no es un fallo de la canción.
+      if (error && error.name === "AbortError") return false;
+      if (error && error.name === "NotAllowedError") { setMusicUI(false); return false; }
+      showMissingSong();
+      return false;
+    }
+  }
+
+  musicButton.addEventListener("click", () => {
+    autoStartDone = true;
     if (audio.paused) {
-      setMusicUI(true);
-      try {
-        await audio.play();
-      } catch (error) {
-        // Si se pulsó pausa mientras empezaba a sonar, no es un fallo de la canción.
-        if (error && error.name === "AbortError") return;
-        if (error && error.name === "NotAllowedError") { setMusicUI(false); return; }
-        showMissingSong();
-      }
+      startMusic();
     } else {
       audio.pause();
       setMusicUI(false);
     }
+  });
+
+  // La canción empieza nada más entrar. Los navegadores (sobre todo Safari en iPhone) solo dejan
+  // reproducir sonido tras un toque, así que se intenta al cargar y, si se bloquea, con el primer toque.
+  let autoStartDone = false;
+  const firstTouchEvents = ["click", "touchend", "keydown"];
+  function disarmAutoStart() { firstTouchEvents.forEach(name => document.removeEventListener(name, onFirstTouch, true)); }
+  async function onFirstTouch(event) {
+    if (autoStartDone || musicButton.contains(event.target)) return;
+    autoStartDone = true;
+    disarmAutoStart();
+    startMusic();
+  }
+  firstTouchEvents.forEach(name => document.addEventListener(name, onFirstTouch, true));
+  window.addEventListener("load", async () => {
+    if (autoStartDone) return;
+    audio.src = MUSIC_FILE;
+    audioReady = true;
+    try {
+      await audio.play();
+      autoStartDone = true;
+      disarmAutoStart();
+      setMusicUI(true);
+    } catch { /* bloqueado hasta el primer toque: queda armado onFirstTouch */ }
   });
   audio.addEventListener("error", () => {
     // Sin archivo (o formato no válido): el botón vuelve a su estado normal.
